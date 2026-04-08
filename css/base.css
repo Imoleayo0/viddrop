@@ -1,0 +1,39 @@
+/* ================================
+   base.css — Reset, variables, body
+   ================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg:           #07110c;
+  --surface:      #0d1a13;
+  --surface2:     #13241b;
+  --border:       rgba(255,255,255,0.07);
+  --border-hover: rgba(255,255,255,0.15);
+  --accent:       #32c36c;
+  --accent2:      #91f2b3;
+  --text:         #edf7f0;
+  --muted:        #6d8978;
+  --muted2:       #a8c1b0;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Page wrapper */
+.page {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}

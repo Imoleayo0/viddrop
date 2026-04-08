@@ -1,0 +1,60 @@
+/* ================================
+   background.css — Blobs + grain
+   ================================ */
+
+.bg-blobs {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.18;
+}
+
+.blob-1 {
+  width: 600px;
+  height: 600px;
+  background: #14532d;
+  top: -200px;
+  left: -150px;
+  animation: drift1 18s ease-in-out infinite alternate;
+}
+
+.blob-2 {
+  width: 500px;
+  height: 500px;
+  background: #22c55e;
+  bottom: -200px;
+  right: -100px;
+  animation: drift2 22s ease-in-out infinite alternate;
+}
+
+.blob-3 {
+  width: 300px;
+  height: 300px;
+  background: #86efac;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: drift3 15s ease-in-out infinite alternate;
+}
+
+@keyframes drift1 { to { transform: translate(60px, 80px); } }
+@keyframes drift2 { to { transform: translate(-40px, -60px); } }
+@keyframes drift3 { to { transform: translate(-40%, -60%); } }
+
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 200px;
+}
