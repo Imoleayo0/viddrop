@@ -1,6 +1,5 @@
 .venv/
 venv/
-.env.example
 .env
 
 __pycache__/
