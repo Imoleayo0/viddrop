@@ -77,7 +77,7 @@ def validate_url(url: str) -> None:
         if pattern in url_lower:
             raise SecurityError(f"URL contains blocked pattern: {pattern}")
 
-    clean_host = hostname.lower().lstrip("www.")
+    clean_host = hostname.lower().removeprefix("www.")
     allowed_clean = {domain.lstrip("www.") for domain in ALLOWED_DOMAINS}
 
     if hostname.lower() not in ALLOWED_DOMAINS and clean_host not in allowed_clean:

@@ -2,12 +2,15 @@
 # config.py - App settings
 # ================================
 
+import logging
 import os
 from pathlib import Path
 
 from dotenv import load_dotenv
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 temp_dir_value = os.getenv("TEMP_DIR") or os.getenv("TMP_DIR") or "/tmp/viddrop"
 TEMP_DIR = Path(temp_dir_value)
@@ -23,6 +26,13 @@ CORS_ORIGINS = [
     ).split(",")
     if origin.strip()
 ]
+
+# Fix: warn at startup if CORS is still pointing at localhost
+if all("localhost" in o or "127.0.0.1" in o for o in CORS_ORIGINS):
+    logger.warning(
+        "CORS_ORIGINS is set to localhost only — frontend requests will be blocked in production. "
+        "Set the CORS_ORIGINS env var to your deployed frontend URL."
+    )
 
 MAX_FILE_SIZE = int(os.getenv("MAX_FILE_SIZE", 500 * 1024 * 1024))
 

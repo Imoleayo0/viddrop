@@ -5,6 +5,7 @@
 import asyncio
 import shutil
 import logging
+import time
 from pathlib import Path
 
 from config import TEMP_DIR, FILE_TTL_SECONDS
@@ -39,17 +40,22 @@ async def purge_stale_files() -> None:
     Catches cases where delete_file_after_send didn't run
     (e.g. client disconnected mid-download).
     """
-    import time
-
     while True:
         await asyncio.sleep(60)  # check every minute
+
+        # Fix 2: guard against TEMP_DIR not existing on cold start race
+        if not TEMP_DIR.exists():
+            continue
+
         now = time.time()
 
         for job_dir in TEMP_DIR.iterdir():
             if not job_dir.is_dir():
                 continue
             try:
-                age = now - job_dir.stat().st_mtime
+                # Fix 1: use st_ctime (creation time) instead of st_mtime
+                # mtime changes on file modification, ctime is more reliable for TTL
+                age = now - job_dir.stat().st_ctime
                 if age > FILE_TTL_SECONDS:
                     shutil.rmtree(job_dir, ignore_errors=True)
                     logger.info(f"[cleaner] Purged stale job: {job_dir}")

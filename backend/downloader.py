@@ -3,6 +3,7 @@
 # ================================
 
 import asyncio
+import shutil
 import uuid
 from pathlib import Path
 from typing import Tuple
@@ -39,7 +40,8 @@ def _build_ydl_opts(fmt: str, out_path: Path, is_audio: bool) -> dict:
 
 
 def _find_downloaded_file(directory: Path) -> Path:
-    files = list(directory.iterdir())
+    # Fix 3: skip .part files left behind by interrupted downloads
+    files = [f for f in directory.iterdir() if f.suffix != ".part"]
     if not files:
         raise DownloadError("Download completed but no file was found.")
     return files[0]
@@ -54,10 +56,12 @@ async def download_video(url: str, quality: str) -> Tuple[Path, str]:
 
     opts = _build_ydl_opts(fmt, job_dir, is_audio)
 
-    loop = asyncio.get_event_loop()
+    # Fix 1: get_event_loop() deprecated in 3.10+, use get_running_loop()
     try:
-        await loop.run_in_executor(None, _run_ydl, url, opts)
+        await asyncio.get_running_loop().run_in_executor(None, _run_ydl, url, opts)
     except yt_dlp.utils.DownloadError as exc:
+        # Fix 2: clean up job dir on download failure
+        shutil.rmtree(job_dir, ignore_errors=True)
         raise DownloadError(str(exc)) from exc
 
     file_path = _find_downloaded_file(job_dir)

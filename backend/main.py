@@ -6,6 +6,7 @@ import asyncio
 import logging
 import mimetypes
 import traceback
+from contextlib import asynccontextmanager
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,10 +27,19 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+# Fix 1: replaced deprecated @app.on_event("startup") with lifespan
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("VidDrop API starting up...")
+    asyncio.create_task(purge_stale_files())
+    yield
+
+
 app = FastAPI(
     title="VidDrop API",
     description="Video download backend powered by yt-dlp",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 app.state.limiter = limiter
@@ -39,14 +49,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
     allow_methods=["POST", "GET"],
-    allow_headers=["*"],
+    allow_headers=["Content-Type"],
 )
-
-
-@app.on_event("startup")
-async def startup() -> None:
-    logger.info("VidDrop API starting up...")
-    asyncio.create_task(purge_stale_files())
 
 
 class DownloadRequest(BaseModel):
@@ -96,20 +100,23 @@ async def handle_download(
     mime, _ = mimetypes.guess_type(filename)
     mime = mime or "application/octet-stream"
 
+    # Fix 2: removed background= from FileResponse to avoid double cleanup
     background_tasks.add_task(delete_file_after_send, file_path)
 
     return FileResponse(
         path=file_path,
         media_type=mime,
         filename=filename,
-        background=background_tasks,
     )
 
 
+# Fix 3: guard against swallowing HTTPException and RateLimitExceeded
 @app.exception_handler(Exception)
 async def generic_exception_handler(request: Request, exc: Exception):
-    error_msg = traceback.format_exc()
-    logger.error(f"Unhandled exception:\n{error_msg}")
+    if isinstance(exc, (HTTPException, RateLimitExceeded)):
+        raise exc
+
+    logger.error(f"Unhandled exception:\n{traceback.format_exc()}")
     return JSONResponse(
         status_code=500,
         content={"detail": "Internal server error"},
