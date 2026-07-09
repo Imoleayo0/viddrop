@@ -16,8 +16,8 @@ function resolveApiUrl() {
   }
 
   const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-  if (window.location.protocol.startsWith('http') && !isLocalHost) {
-    return `${window.location.origin}/api/download`;
+  if (isLocalHost) {
+    return 'http://localhost:8000/api/download';
   }
 
   return 'https://viddrop-production-6131.up.railway.app/api/download';
