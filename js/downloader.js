@@ -20,7 +20,7 @@ function resolveApiUrl() {
     return `${window.location.origin}/api/download`;
   }
 
-  return 'http://localhost:8000/api/download';
+  return 'viddrop-production-6131.up.railway.app';
 }
 
 const API_URL = resolveApiUrl();
