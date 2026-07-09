@@ -20,7 +20,7 @@ function resolveApiUrl() {
     return `${window.location.origin}/api/download`;
   }
 
-  return 'viddrop-production-6131.up.railway.app';
+  return 'https://viddrop-production-6131.up.railway.app/api/download';
 }
 
 const API_URL = resolveApiUrl();
